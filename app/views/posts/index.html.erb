@@ -1,0 +1,194 @@
+<div class="w-full max-w-4xl mx-auto space-y-12 pb-20">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold tracking-tight">Lexxy Playground</h1>
+    <p class="mt-2 text-gray-500">Lexxy (<%= Lexxy::VERSION %>) — a modern rich text editor for Rails, powered by Lexical</p>
+  </div>
+
+  <%# ==================== 1. Basic Editor ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">1. Basic Rich Text Editor</h2>
+    <p class="text-sm text-gray-500">Full toolbar, all features enabled. Uses <code>form.rich_text_area</code>.</p>
+    <%= form_with model: Post.new, html: { class: "space-y-3" } do |f| %>
+      <%= f.label :title, "Title", class: "block text-sm font-medium" %>
+      <%= f.text_field :title, class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+      <%= f.label :content, "Content", class: "block text-sm font-medium" %>
+      <%= f.rich_text_area :content %>
+      <%= f.submit "Save", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+    <% end %>
+  </section>
+
+  <%# ==================== 2. Plain Text Editor ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">2. Plain Text Editor</h2>
+    <p class="text-sm text-gray-500">No rich text — <code>rich-text="false"</code>, no toolbar. Type <code>**bold**</code> and see raw markdown.</p>
+    <lexxy-editor name="demo[plain]" class="lexxy-content" placeholder="Plain text only..." rich-text="false" toolbar="false"></lexxy-editor>
+  </section>
+
+  <%# ==================== 3. Single Line Editor ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">3. Single Line Editor</h2>
+    <p class="text-sm text-gray-500">Press Enter — it won't create a new paragraph. <code>multi-line="false"</code></p>
+    <lexxy-editor name="demo[singleline]" class="lexxy-content" placeholder="Single line only..." multi-line="false"></lexxy-editor>
+  </section>
+
+  <%# ==================== 4. No Toolbar + 5. Minimal Toolbar ==================== %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+      <h2 class="text-lg font-semibold">4. No Toolbar</h2>
+      <p class="text-sm text-gray-500">Uses <code>preset="simple"</code> (toolbar disabled via config). Keyboard shortcuts still work: <kbd>Ctrl+B</kbd>, <kbd>Ctrl+I</kbd></p>
+      <lexxy-editor name="demo[notoolbar]" class="lexxy-content" placeholder="No toolbar — use keyboard shortcuts..." preset="simple"></lexxy-editor>
+    </section>
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+      <h2 class="text-lg font-semibold">5. Minimal Toolbar</h2>
+      <p class="text-sm text-gray-500">Uses <code>preset="minimal"</code> — toolbar visible but upload button hidden.</p>
+      <lexxy-editor name="demo[minimal]" class="lexxy-content" placeholder="Minimal toolbar, no upload button..." preset="minimal"></lexxy-editor>
+    </section>
+  </div>
+
+  <%# ==================== 6. Markdown Disabled ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">6. Markdown Disabled</h2>
+    <p class="text-sm text-gray-500"><code>preset="nomarkdown"</code>. Type <code>**bold**</code> or <code># header</code> — they won't auto-format.</p>
+    <lexxy-editor name="demo[nomarkdown]" class="lexxy-content" placeholder="Markdown shortcuts disabled..." preset="nomarkdown"></lexxy-editor>
+  </section>
+
+  <%# ==================== 7. Code Highlighting ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">7. Code Syntax Highlighting</h2>
+    <p class="text-sm text-gray-500">Insert a code block from the toolbar (or type <code>```</code>). Real-time syntax highlighting.</p>
+    <lexxy-editor name="demo[code]" class="lexxy-content" placeholder="Try pasting or typing code..." preset="code">
+      <p>Paste this to see highlighting:</p>
+      <pre><code>def hello
+  puts "Hello, Lexxy!"
+end</code></pre>
+    </lexxy-editor>
+  </section>
+
+  <%# ==================== 8. Inline Mentions ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">8. @Mentions (Inline Loading)</h2>
+    <p class="text-sm text-gray-500">Type <code>@</code> to trigger the mention prompt. Items are pre-loaded inline.</p>
+    <lexxy-editor name="demo[mentions_inline]" class="lexxy-content" placeholder="Type @ to mention someone...">
+      <lexxy-prompt trigger="@" name="mention">
+        <%= render partial: "people/prompt_item", collection: Person.all, as: :person %>
+      </lexxy-prompt>
+    </lexxy-editor>
+  </section>
+
+  <%# ==================== 9. Remote Mentions ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">9. @Mentions (Remote Loading)</h2>
+    <p class="text-sm text-gray-500">Type <code>@</code> — items are loaded from the server via <code>src</code> attribute.</p>
+    <lexxy-editor name="demo[mentions_remote]" class="lexxy-content" placeholder="Type @ to mention someone (loaded remotely)...">
+      <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+    </lexxy-editor>
+  </section>
+
+  <%# ==================== 10. Free HTML Prompt ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">10. Free HTML Prompt (Editable Text)</h2>
+    <p class="text-sm text-gray-500">Type <code>#</code> to insert hashtags as editable text, not attachments.</p>
+    <lexxy-editor name="demo[hashtags]" class="lexxy-content" placeholder="Type # to insert a hashtag...">
+      <lexxy-prompt trigger="#" insert-editable-text>
+        <lexxy-prompt-item search="rubyonrails">
+          <template type="menu"><span class="text-blue-600">#rubyonrails</span></template>
+          <template type="editor"><span class="text-blue-600 font-medium">#rubyonrails</span></template>
+        </lexxy-prompt-item>
+        <lexxy-prompt-item search="hotwire">
+          <template type="menu"><span class="text-blue-600">#hotwire</span></template>
+          <template type="editor"><span class="text-blue-600 font-medium">#hotwire</span></template>
+        </lexxy-prompt-item>
+        <lexxy-prompt-item search="lexxy">
+          <template type="menu"><span class="text-blue-600">#lexxy</span></template>
+          <template type="editor"><span class="text-blue-600 font-medium">#lexxy</span></template>
+        </lexxy-prompt-item>
+        <lexxy-prompt-item search="rails">
+          <template type="menu"><span class="text-blue-600">#rails</span></template>
+          <template type="editor"><span class="text-blue-600 font-medium">#rails</span></template>
+        </lexxy-prompt-item>
+        <lexxy-prompt-item search="stimulus">
+          <template type="menu"><span class="text-blue-600">#stimulusreflex</span></template>
+          <template type="editor"><span class="text-blue-600 font-medium">#stimulusreflex</span></template>
+        </lexxy-prompt-item>
+      </lexxy-prompt>
+    </lexxy-editor>
+  </section>
+
+  <%# ==================== 11. Text Highlighting ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">11. Text Highlighting (Color & Background)</h2>
+    <p class="text-sm text-gray-500">Use the highlight toolbar button (or configure with <code>preset="code"</code>) to apply text color and background.</p>
+    <lexxy-editor name="demo[highlight]" class="lexxy-content" placeholder="Select text and use the highlight toolbar..." preset="code"></lexxy-editor>
+  </section>
+
+  <%# ==================== 12. Events Demo ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3" data-controller="lexxy-events">
+    <h2 class="text-lg font-semibold">12. Events Monitor</h2>
+    <p class="text-sm text-gray-500">Interact with the editor and watch events fire in real-time.</p>
+    <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
+      <span data-lexxy-events-target="fileInfo"></span>
+      <progress data-lexxy-events-target="fileProgress" class="hidden w-32 h-2 rounded"></progress>
+    </div>
+    <lexxy-editor name="demo[events]" class="lexxy-content" placeholder="Type, focus, blur, upload files here..."></lexxy-editor>
+    <div class="mt-2">
+      <div class="text-xs font-medium text-gray-400 mb-1">Event Log:</div>
+      <div data-lexxy-events-target="log" class="h-32 overflow-y-auto bg-gray-50 rounded border border-gray-200 p-2 space-y-0.5">
+        <div class="text-xs text-gray-400 italic">Waiting for events...</div>
+      </div>
+    </div>
+  </section>
+
+  <%# ==================== 13. Link Unfurling ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3" data-controller="link-unfurl">
+    <h2 class="text-lg font-semibold">13. Link Unfurling</h2>
+    <p class="text-sm text-gray-500">Paste a URL (e.g., <code>https://github.com</code> or <code>https://basecamp.com</code>) and it unfurls with a custom title.</p>
+    <lexxy-editor name="demo[link_unfurl]" class="lexxy-content" placeholder="Paste a URL like https://github.com..."></lexxy-editor>
+    <div class="mt-2">
+      <div class="text-xs font-medium text-gray-400 mb-1">Unfurl Log:</div>
+      <div data-link-unfurl-target="log" class="h-24 overflow-y-auto bg-gray-50 rounded border border-gray-200 p-2 space-y-0.5">
+        <div class="text-xs text-gray-400 italic">Paste a known URL to see unfurling...</div>
+      </div>
+    </div>
+  </section>
+
+  <%# ==================== 14. Attachments ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">14. File Attachments</h2>
+    <p class="text-sm text-gray-500">Drag & drop or use the toolbar buttons to upload images, PDFs, or videos. Powered by Active Storage.</p>
+    <lexxy-editor name="demo[attachments]" class="lexxy-content" placeholder="Drop files here or use the toolbar to upload..."></lexxy-editor>
+  </section>
+
+  <%# ==================== 15. Restricted Attachments ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">15. Restricted Attachment Types</h2>
+    <p class="text-sm text-gray-500">Only certain attachment types allowed. Try uploading a non-image file — it will be rejected.</p>
+    <lexxy-editor name="demo[restricted]" class="lexxy-content" placeholder="Only images allowed..." permitted-attachment-types="image/png image/jpeg image/gif image/webp"></lexxy-editor>
+  </section>
+
+  <%# ==================== 16. Posts List ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">16. Saved Posts</h2>
+    <p class="text-sm text-gray-500">Posts created with the basic editor above appear here.</p>
+    <% if @posts.any? %>
+      <div class="space-y-3">
+        <% @posts.each do |post| %>
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-medium"><%= link_to post.title.presence || "Untitled", post, class: "text-blue-600 hover:underline" %></h3>
+              <div class="flex gap-2 text-xs">
+                <%= link_to "Show", post, class: "text-gray-500 hover:text-gray-700" %>
+                <%= link_to "Edit", edit_post_path(post), class: "text-gray-500 hover:text-gray-700" %>
+                <%= button_to "Delete", post, method: :delete, class: "text-red-500 hover:text-red-700", data: { turbo_confirm: "Are you sure?" } %>
+              </div>
+            </div>
+            <div class="mt-2 text-sm text-gray-600 line-clamp-2 lexxy-content">
+              <%= post.content %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-400 italic">No posts yet. Use the basic editor above to create one!</p>
+    <% end %>
+  </section>
+</div>
