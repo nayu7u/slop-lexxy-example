@@ -24,7 +24,21 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200">
+      <nav class="container mx-auto px-5 h-14 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <%= link_to "Lexxy Playground", root_path, class: "font-semibold text-gray-900 hover:text-blue-600 transition-colors" %>
+          <div class="flex items-center gap-4 text-sm">
+            <%= link_to "機能一覧", root_path, class: "#{current_page?(root_path) ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'} transition-colors" %>
+            <%= link_to "実務ユースケース", practicals_path, class: "#{current_page?(practicals_path) ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'} transition-colors" %>
+          </div>
+        </div>
+        <div class="text-xs text-gray-400">
+          Rails <%= Rails::VERSION::STRING %> / Lexxy <%= Lexxy::VERSION %>
+        </div>
+      </nav>
+    </header>
+    <main class="container mx-auto mt-20 px-5 flex">
       <%= yield %>
     </main>
   </body>

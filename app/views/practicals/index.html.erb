@@ -1,0 +1,271 @@
+<div class="w-full max-w-4xl mx-auto space-y-12 pb-20">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">実務ユースケース</h1>
+      <p class="mt-2 text-gray-500">Lexxy を実際のプロダクトで使う場合のパターン集</p>
+    </div>
+    <%= link_to "← 機能一覧に戻る", root_path, class: "text-sm text-blue-600 hover:underline shrink-0" %>
+  </div>
+
+  <%# ==================== 1. Blog Article ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">1. ブログ記事エディタ</h2>
+        <p class="text-sm text-gray-500">CMS のような本格的な記事編集。コードブロック・画像添付・見出しを活用。</p>
+      </div>
+      <span class="text-xs bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full">基本 + コード + 添付</span>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "blog" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <%= label_tag :blog_title, "記事タイトル", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :blog_title, params[:blog_title], placeholder: "例: Rails 8 の新機能について", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :blog_category, "カテゴリ", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :blog_category, options_for_select(["技術", "デザイン", "ビジネス", "カルチャー"], params[:blog_category]), prompt: "選択してください", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :blog_meta, "SEO メタディスクリプション", class: "block text-sm font-medium mb-1" %>
+        <%= text_area_tag :blog_meta, params[:blog_meta], rows: 2, placeholder: "検索結果に表示される説明文", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+      </div>
+
+      <div>
+        <%= label_tag :blog_content, "記事本文", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="blog_content" class="lexxy-content" placeholder="記事の内容を書き始めてください..."><%= params[:blog_content].presence %></lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-4 pt-2">
+        <div class="flex items-center gap-2">
+          <%= check_box_tag :blog_published, "1", params[:blog_published].present?, class: "rounded border-gray-300" %>
+          <%= label_tag :blog_published, "公開する", class: "text-sm" %>
+        </div>
+        <%= f.submit "プレビュー", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+      </div>
+    <% end %>
+
+    <% if @submitted && @submitted[:submitted] == "blog" %>
+      <%# Preview rendering removed for brevity - handled in a real app by a show action %>
+    <% end %>
+  </section>
+
+  <%# ==================== 2. Announcement with @mentions ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">2. 社内お知らせ + @メンション</h2>
+        <p class="text-sm text-gray-500">チームメンバーを @mention でメンションし、関連資料を添付。</p>
+      </div>
+      <span class="text-xs bg-green-50 text-green-600 font-medium px-2 py-0.5 rounded-full">メンション + 添付</span>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "announcement" %>
+
+      <div>
+        <%= label_tag :announcement_title, "タイトル", class: "block text-sm font-medium mb-1" %>
+        <%= text_field_tag :announcement_title, params[:announcement_title], placeholder: "例: 来週の全体ミーティングのお知らせ", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= label_tag :announcement_audience, "対象", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :announcement_audience, options_for_select(["全社員", "開発チーム", "デザインチーム", "マーケティング"], params[:announcement_audience]), prompt: "選択してください", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :announcement_priority, "重要度", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :announcement_priority, options_for_select([["通常", "normal"], ["重要", "important"], ["緊急", "urgent"]], params[:announcement_priority]), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :announcement_body, "本文", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="announcement_body" class="lexxy-content" placeholder="@" でチームメンバーをメンションできます...">
+          <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="text-xs text-gray-400">
+        💡 <code>@</code> を入力すると登録済みのメンバーが候補に表示されます。ファイルをドラッグ＆ドロップして添付することもできます。
+      </div>
+
+      <%= f.submit "プレビュー", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+    <% end %>
+  </section>
+
+  <%# ==================== 3. Support Reply ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">3. カスタマーサポート返信</h2>
+        <p class="text-sm text-gray-500">既存のスレッドを確認しながら、メンション付きで返信を作成。</p>
+      </div>
+      <span class="text-xs bg-amber-50 text-amber-600 font-medium px-2 py-0.5 rounded-full">既読表示 + メンション</span>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 space-y-3">
+      <div class="text-xs font-medium text-gray-400 uppercase tracking-wide">返信元チケット</div>
+      <div class="border-l-4 border-blue-400 pl-4 space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium">山田 太郎</span>
+          <span class="text-xs text-gray-400">&lt;yamada@example.com&gt;</span>
+          <span class="text-xs text-gray-400">2026/06/12 14:32</span>
+        </div>
+        <div class="text-sm text-gray-700 lexxy-content">
+          <p>ログインボタンをクリックしても何も反応しません。ブラウザは Chrome 最新版です。</p>
+          <p>エラーメッセージなどは表示されていません。</p>
+        </div>
+        <div class="text-xs text-gray-400">チケット #TKT-2024-0312</div>
+      </div>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4 pt-2" do |f| %>
+      <%= hidden_field_tag :submitted, "support" %>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <%= label_tag :support_reply, "返信", class: "block text-sm font-medium" %>
+          <span class="text-xs text-gray-400">@ で担当者をメンション / ファイル添付可</span>
+        </div>
+        <lexxy-editor name="support_reply" class="lexxy-content" placeholder="返信内容を入力..." permitted-attachment-types="image/png image/jpeg image/gif image/webp application/pdf">
+          <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "返信を送信", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+        <span class="text-xs text-gray-400">実際には送信されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ==================== 4. Email Template Variables ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">4. メールテンプレート変数挿入</h2>
+        <p class="text-sm text-gray-500">カスタムプロンプトでテンプレート変数を挿入。マーケティングメールなどに。</p>
+      </div>
+      <span class="text-xs bg-purple-50 text-purple-600 font-medium px-2 py-0.5 rounded-full">カスタムプロンプト</span>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "email" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= label_tag :email_subject, "件名", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :email_subject, params[:email_subject], placeholder: "例: {{customer_name}} 様、キャンペーンのお知らせ", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :email_recipient, "宛先リスト", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :email_recipient, params[:email_recipient], placeholder: "例: customers@example.com", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :email_body, "本文", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 <code>{{</code> と入力すると挿入可能な変数が表示されます
+        </div>
+        <lexxy-editor name="email_body" class="lexxy-content" placeholder="{{ で変数を挿入...">
+          <lexxy-prompt trigger="{{" insert-editable-text>
+            <lexxy-prompt-item search="customer_name">
+              <template type="menu"><code class="text-purple-600">{{customer_name}}</code></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">{{customer_name}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="company_name">
+              <template type="menu"><code class="text-purple-600">{{company_name}}</code></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">{{company_name}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="unsubscribe_link">
+              <template type="menu"><code class="text-purple-600">{{unsubscribe_link}}</code></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">{{unsubscribe_link}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="promo_code">
+              <template type="menu"><code class="text-purple-600">{{promo_code}}</code></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">{{promo_code}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="expiry_date">
+              <template type="menu"><code class="text-purple-600">{{expiry_date}}</code></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">{{expiry_date}}</span></template>
+            </lexxy-prompt-item>
+          </lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <%= f.submit "プレビュー", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+    <% end %>
+  </section>
+
+  <%# ==================== 5. Quick Task ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">5. 簡易タスク管理</h2>
+        <p class="text-sm text-gray-500">単一行のタイトルと最小限のツールバーで素早くタスクを記録。</p>
+      </div>
+      <span class="text-xs bg-rose-50 text-rose-600 font-medium px-2 py-0.5 rounded-full">単一行 + 最小ツールバー</span>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "task" %>
+
+      <div>
+        <%= label_tag :task_title, "タスク", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="task_title" class="lexxy-content" placeholder="タスクを入力..." preset="singleline"></lexxy-editor>
+      </div>
+
+      <div>
+        <%= label_tag :task_description, "詳細（任意）", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="task_description" class="lexxy-content" placeholder="補足情報があれば..." preset="minimal"></lexxy-editor>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= label_tag :task_due, "期限", class: "block text-sm font-medium mb-1" %>
+          <%= date_field_tag :task_due, params[:task_due], class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :task_priority, "優先度", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :task_priority, options_for_select([["低", "low"], ["中", "medium"], ["高", "high"], ["最優先", "critical"]], params[:task_priority] || "medium"), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :task_assignee, "担当者", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :task_assignee, options_from_collection_for_select(Person.all, :id, :name, params[:task_assignee]), prompt: "選択してください", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <%= f.submit "タスクを作成", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500" %>
+    <% end %>
+  </section>
+
+  <%# ==================== Summary ==================== %>
+  <section class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6 space-y-3">
+    <h2 class="text-lg font-semibold">実務適用のポイント</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <div class="font-medium mb-1">ユースケースに応じた設定</div>
+        <p class="text-gray-500">タスク管理では <code>preset="singleline"</code> や <code>preset="minimal"</code> のように、入力内容に合わせてツールバーや挙動を制限することで、ユーザー体験を最適化できます。</p>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <div class="font-medium mb-1">カスタムプロンプトで業務効率化</div>
+        <p class="text-gray-500">メールテンプレートの変数挿入のように、<code>&lt;lexxy-prompt&gt;</code> を使うと業務固有の入力をガイドできます。</p>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <div class="font-medium mb-1">メンション + ファイル添付の組み合わせ</div>
+        <p class="text-gray-500">サポート返信や社内連絡では、メンションとファイル添付を同時に有効にすることで、コミュニケーションを効率化できます。</p>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <div class="font-medium mb-1">Action Text との互換性</div>
+        <p class="text-gray-500">Lexxy は Action Text と同じ canonical HTML 形式を出力するため、既存の <code>has_rich_text</code> モデルをそのまま利用できます。</p>
+      </div>
+    </div>
+  </section>
+</div>

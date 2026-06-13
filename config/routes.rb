@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   resources :people, only: :index
   resources :posts
+  get "practicals", to: "practicals#index"
 
   root "posts#index"
 end
