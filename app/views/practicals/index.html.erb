@@ -2,7 +2,7 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">実務ユースケース</h1>
-      <p class="mt-2 text-gray-500">Lexxy を実際のプロダクトで使う場合のパターン集</p>
+      <p class="mt-2 text-gray-500">Lexxy を実際のプロダクトで使う場合のパターン集（10 パターン）</p>
     </div>
     <%= link_to "← 機能一覧に戻る", root_path, class: "text-sm text-blue-600 hover:underline shrink-0" %>
   </div>
@@ -236,13 +236,315 @@
     <% end %>
   </section>
 
+  <%# ==================== 6. Incident Report ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <%= render "section_header",
+        title:       "6. インシデントレポート",
+        description: "コードブロックでエラーログを貼付、画像添付、文字色で緊急度をハイライト。",
+        badge:       "コード + ハイライト + 添付",
+        badge_class: "bg-red-50 text-red-600" %>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "incident" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= label_tag :incident_id, "インシデント番号", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :incident_id, params[:incident_id], placeholder: "例: INC-2026-0612", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :incident_severity, "緊急度", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :incident_severity, options_for_select(["P1（最重要）", "P2（重要）", "P3（通常）", "P4（情報）"], params[:incident_severity] || "P3（通常）"), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :incident_status, "ステータス", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :incident_status, options_for_select(["発生中", "調査中", "対応中", "解決済"], params[:incident_status] || "発生中"), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :incident_summary, "概要", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="incident_summary" class="lexxy-content" placeholder="事象の概要を記載..." preset="singleline"></lexxy-editor>
+      </div>
+
+      <div>
+        <%= label_tag :incident_details, "詳細・再現手順", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 コードブロック（```）でログやエラーメッセージを貼付 / 画像をドラッグ＆ドロップしてスクリーンショットを添付 / 文字色で重要ポイントを目立たせられます
+        </div>
+        <lexxy-editor name="incident_details" class="lexxy-content" placeholder="再現手順、エラーメッセージ、調査結果を記載..." preset="code">
+          <lexxy-prompt trigger="#" insert-editable-text>
+            <lexxy-prompt-item search="調査中">
+              <template type="menu"><span class="text-amber-600">#調査中</span></template>
+              <template type="editor"><span class="text-amber-600 font-medium bg-amber-50 px-1 rounded">#調査中</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="対応完了">
+              <template type="menu"><span class="text-green-600">#対応完了</span></template>
+              <template type="editor"><span class="text-green-600 font-medium bg-green-50 px-1 rounded">#対応完了</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="要フォローアップ">
+              <template type="menu"><span class="text-red-600">#要フォローアップ</span></template>
+              <template type="editor"><span class="text-red-600 font-medium bg-red-50 px-1 rounded">#要フォローアップ</span></template>
+            </lexxy-prompt-item>
+          </lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "レポートを保存", class: "rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500" %>
+        <span class="text-xs text-gray-400">実際には保存されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ==================== 7. Meeting Minutes ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <%= render "section_header",
+        title:       "7. 議事録エディタ",
+        description: "@メンションで出席者を記録、#タグで議題を分類、資料を添付。",
+        badge:       "メンション + タグ + 添付",
+        badge_class: "bg-teal-50 text-teal-600" %>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "meeting" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <%= label_tag :meeting_title, "会議タイトル", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :meeting_title, params[:meeting_title], placeholder: "例: 週次開発ミーティング", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :meeting_date, "開催日", class: "block text-sm font-medium mb-1" %>
+          <%= date_field_tag :meeting_date, params[:meeting_date] || Date.current.to_s, class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :meeting_attendees, "出席者", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 <code>@</code> で出席者をメンションして記録（候補が表示されます）
+        </div>
+        <lexxy-editor name="meeting_attendees" class="lexxy-content" placeholder="@ で出席者を追加..." preset="minimal">
+          <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div>
+        <%= label_tag :meeting_agenda, "議事内容・決定事項", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 <code>#</code> でタグ（#議題 #タスク #決定 etc.）を挿入して分類
+        </div>
+        <lexxy-editor name="meeting_agenda" class="lexxy-content" placeholder="議事内容を記載...">
+          <lexxy-prompt trigger="#" insert-editable-text>
+            <lexxy-prompt-item search="議題">
+              <template type="menu"><span class="text-teal-600">#議題</span></template>
+              <template type="editor"><span class="text-teal-600 font-medium bg-teal-50 px-1 rounded">#議題</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="タスク">
+              <template type="menu"><span class="text-blue-600">#タスク</span></template>
+              <template type="editor"><span class="text-blue-600 font-medium bg-blue-50 px-1 rounded">#タスク</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="決定">
+              <template type="menu"><span class="text-green-600">#決定</span></template>
+              <template type="editor"><span class="text-green-600 font-medium bg-green-50 px-1 rounded">#決定</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="検討事項">
+              <template type="menu"><span class="text-amber-600">#検討事項</span></template>
+              <template type="editor"><span class="text-amber-600 font-medium bg-amber-50 px-1 rounded">#検討事項</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="次回">
+              <template type="menu"><span class="text-purple-600">#次回</span></template>
+              <template type="editor"><span class="text-purple-600 font-medium bg-purple-50 px-1 rounded">#次回</span></template>
+            </lexxy-prompt-item>
+          </lexxy-prompt>
+          <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "議事録を保存", class: "rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500" %>
+        <span class="text-xs text-gray-400">実際には保存されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ==================== 8. Knowledge Wiki ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <%= render "section_header",
+        title:       "8. 社内ナレッジ / Wiki 編集",
+        description: "コードブロックで手順を共有、画像・動画を添付して視覚的なナレッジベースを構築。",
+        badge:       "コード + フル機能",
+        badge_class: "bg-indigo-50 text-indigo-600" %>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "wiki" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <%= label_tag :wiki_title, "記事タイトル", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :wiki_title, params[:wiki_title], placeholder: "例: 開発環境構築手順", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :wiki_category, "カテゴリ", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :wiki_category, options_for_select(["開発", "インフラ", "デザイン", "ビジネス", "その他"], params[:wiki_category]), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :wiki_body, "本文", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 コードブロック（```）でコマンドや設定ファイルを共有 / 画像や動画をドラッグ＆ドロップで添付
+        </div>
+        <lexxy-editor name="wiki_body" class="lexxy-content" placeholder="ナレッジ記事を書き始めてください..." preset="code">
+          <lexxy-prompt trigger="#" insert-editable-text>
+            <lexxy-prompt-item search="手順">
+              <template type="menu"><span class="text-indigo-600">#手順</span></template>
+              <template type="editor"><span class="text-indigo-600 font-medium bg-indigo-50 px-1 rounded">#手順</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="注意">
+              <template type="menu"><span class="text-red-600">#注意</span></template>
+              <template type="editor"><span class="text-red-600 font-medium bg-red-50 px-1 rounded">#注意</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="Tips">
+              <template type="menu"><span class="text-green-600">#Tips</span></template>
+              <template type="editor"><span class="text-green-600 font-medium bg-green-50 px-1 rounded">#Tips</span></template>
+            </lexxy-prompt-item>
+          </lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "記事を公開", class: "rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500" %>
+        <span class="text-xs text-gray-400">実際には公開されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ==================== 9. Weekly Report ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <%= render "section_header",
+        title:       "9. 週次レポート / 進捗報告",
+        description: "テンプレート変数で効率的に週次報告を作成。最小ツールバーでシンプルなUX。",
+        badge:       "テンプレート変数 + 最小ツールバー",
+        badge_class: "bg-orange-50 text-orange-600" %>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "weekly" %>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <%= label_tag :weekly_period, "報告対象期間", class: "block text-sm font-medium mb-1" %>
+          <%= text_field_tag :weekly_period, params[:weekly_period], placeholder: "例: 2026/06/09 〜 2026/06/13", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :week, "週", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :week, options_for_select((1..52).map { |w| ["#{w}週目", w] }, params[:week] || Time.current.strftime("%V").to_i), class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <%= label_tag :weekly_report, "レポート内容", class: "block text-sm font-medium" %>
+          <span class="text-xs text-gray-400"><code>{{</code> でテンプレート変数を挿入</span>
+        </div>
+        <lexxy-editor name="weekly_report" class="lexxy-content" placeholder="週次レポートを記載..." preset="minimal">
+          <lexxy-prompt trigger="{{" insert-editable-text>
+            <lexxy-prompt-item search="project_name">
+              <template type="menu"><code class="text-orange-600">{{project_name}}</code></template>
+              <template type="editor"><span class="text-orange-600 font-medium bg-orange-50 px-1 rounded">{{project_name}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="completed_tasks">
+              <template type="menu"><code class="text-orange-600">{{completed_tasks}}</code></template>
+              <template type="editor"><span class="text-orange-600 font-medium bg-orange-50 px-1 rounded">{{completed_tasks}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="next_week_plan">
+              <template type="menu"><code class="text-orange-600">{{next_week_plan}}</code></template>
+              <template type="editor"><span class="text-orange-600 font-medium bg-orange-50 px-1 rounded">{{next_week_plan}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="blockers">
+              <template type="menu"><code class="text-orange-600">{{blockers}}</code></template>
+              <template type="editor"><span class="text-orange-600 font-medium bg-orange-50 px-1 rounded">{{blockers}}</span></template>
+            </lexxy-prompt-item>
+            <lexxy-prompt-item search="member_name">
+              <template type="menu"><code class="text-orange-600">{{member_name}}</code></template>
+              <template type="editor"><span class="text-orange-600 font-medium bg-orange-50 px-1 rounded">{{member_name}}</span></template>
+            </lexxy-prompt-item>
+          </lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "レポートを提出", class: "rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-500" %>
+        <span class="text-xs text-gray-400">実際には提出されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ==================== 10. Kanban Ticket ==================== %>
+  <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    <%= render "section_header",
+        title:       "10. カンバン・チケット詳細",
+        description: "Markdown 有効で手軽に記述、@メンションで担当者、添付で仕様キャプチャ。",
+        badge:       "Markdown + メンション + 添付制限",
+        badge_class: "bg-cyan-50 text-cyan-600" %>
+
+    <div class="bg-cyan-50 rounded-lg border border-cyan-100 p-4 flex items-start gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
+      <div class="text-sm text-cyan-800">
+        <p class="font-medium">チケット #TKT-2026-015</p>
+        <p>ステータス: 開発中 | 優先度: 高 | 担当: 未割り当て</p>
+      </div>
+    </div>
+
+    <%= form_with url: practicals_path, method: :get, local: true, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <%= hidden_field_tag :submitted, "kanban" %>
+
+      <div>
+        <%= label_tag :kanban_title, "件名", class: "block text-sm font-medium mb-1" %>
+        <lexxy-editor name="kanban_title" class="lexxy-content" placeholder="タスクの件名を入力..." preset="singleline"></lexxy-editor>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= label_tag :kanban_assignee, "担当者", class: "block text-sm font-medium mb-1" %>
+          <%= select_tag :kanban_assignee, options_from_collection_for_select(Person.all, :id, :name, params[:kanban_assignee]), prompt: "選択してください", class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+        <div>
+          <%= label_tag :kanban_due, "期限", class: "block text-sm font-medium mb-1" %>
+          <%= date_field_tag :kanban_due, params[:kanban_due], class: "block w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :kanban_description, "詳細", class: "block text-sm font-medium mb-1" %>
+        <div class="text-xs text-gray-400 mb-2">
+          💡 <code>@</code> で担当者をメンション / 画像のみ添付可（仕様キャプチャ用）
+        </div>
+        <lexxy-editor name="kanban_description" class="lexxy-content" placeholder="タスクの詳細や仕様を記載..." permitted-attachment-types="image/png image/jpeg image/gif image/webp">
+          <lexxy-prompt trigger="@" src="<%= people_path %>" name="mention"></lexxy-prompt>
+        </lexxy-editor>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= f.submit "チケットを更新", class: "rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-500" %>
+        <span class="text-xs text-gray-400">実際には更新されません（デモ用フォームです）</span>
+      </div>
+    <% end %>
+  </section>
+
   <%# ==================== Summary ==================== %>
   <section class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6 space-y-3">
     <h2 class="text-lg font-semibold">実務適用のポイント</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
       <div class="bg-white rounded-lg p-4 border border-gray-200">
-        <div class="font-medium mb-1">ユースケースに応じた設定</div>
-        <p class="text-gray-500">タスク管理では <code>preset="singleline"</code> や <code>preset="minimal"</code> のように、入力内容に合わせてツールバーや挙動を制限することで、ユーザー体験を最適化できます。</p>
+        <div class="font-medium mb-1">ハイライト + タグで見える化</div>
+        <p class="text-gray-500">インシデントレポートでは文字色で緊急度を強調し、議事録では <code>#</code> タグで議題を分類することで、業務ドキュメントの可読性を高められます。</p>
+      </div>
+      <div class="bg-white rounded-lg p-4 border border-gray-200">
+        <div class="font-medium mb-1">プリセットの使い分け</div>
+        <p class="text-gray-500">タイトル欄には <code>preset="singleline"</code>、補足欄には <code>preset="minimal"</code>、技術文書には <code>preset="code"</code> など、入力内容に応じてツールバーを使い分けることでUXを最適化できます。</p>
       </div>
       <div class="bg-white rounded-lg p-4 border border-gray-200">
         <div class="font-medium mb-1">カスタムプロンプトで業務効率化</div>
