@@ -1,54 +1,47 @@
-import { Controller } from "@hotwired/stimulus"
+import LoggableController from "controllers/loggable_controller"
 
-export default class extends Controller {
-  static targets = ["log"]
+const KNOWN_DOMAINS = {
+  "github.com": "GitHub",
+  "basecamp.com": "Basecamp",
+  "rubyonrails.org": "Ruby on Rails",
+  "lexical.dev": "Lexical - Text Editor Framework",
+}
 
+export default class extends LoggableController {
   connect() {
     this.editor = this.element.querySelector("lexxy-editor")
     if (!this.editor) return
 
-    this.editor.addEventListener("lexxy:insert-link", this.#onInsertLink)
+    this.editor.addEventListener("lexxy:insert-link", this.onInsertLink)
   }
 
   disconnect() {
     if (!this.editor) return
-    this.editor.removeEventListener("lexxy:insert-link", this.#onInsertLink)
+    this.editor.removeEventListener("lexxy:insert-link", this.onInsertLink)
   }
 
-  #log(msg) {
-    if (this.hasLogTarget) {
-      const entry = document.createElement("div")
-      entry.className = "text-xs font-mono text-gray-600 border-b border-gray-100 py-0.5"
-      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`
-      this.logTarget.appendChild(entry)
-      this.logTarget.scrollTop = this.logTarget.scrollHeight
-    }
-  }
+  onInsertLink = (event) => {
+    const { url, replaceLinkWith } = event.detail
+    this.logMessage(`lexxy:insert-link - URL pasted: ${url}`)
 
-  #onInsertLink = (event) => {
-    const url = event.detail.url
-    this.#log(`lexxy:insert-link - URL pasted: ${url}`)
-
-    const metadata = this.#getLinkMetadata(url)
-    if (metadata) {
-      event.detail.replaceLinkWith(
-        `<a href="${url}" class="font-medium text-blue-600 hover:underline">${metadata.title}</a>`
+    const title = this.resolveTitle(url)
+    if (title) {
+      replaceLinkWith(
+        `<a href="${url}" class="font-medium text-blue-600 hover:underline">${title}</a>`
       )
-      this.#log(`  → Replaced with: "${metadata.title}"`)
+      this.logMessage(`  → Replaced with: "${title}"`)
     }
   }
 
-  #getLinkMetadata(url) {
-    const known = {
-      "github.com": { title: "GitHub" },
-      "basecamp.com": { title: "Basecamp" },
-      "rubyonrails.org": { title: "Ruby on Rails" },
-      "lexical.dev": { title: "Lexical - Text Editor Framework" },
-    }
-
-    for (const [domain, meta] of Object.entries(known)) {
+  /**
+   * Find the display title for a URL from known domain mappings
+   * @param {string} url
+   * @returns {string|null} The resolved title, or null if not matched
+   */
+  resolveTitle(url) {
+    for (const [domain, title] of Object.entries(KNOWN_DOMAINS)) {
       if (url.includes(domain)) {
-        return meta
+        return title
       }
     }
     return null

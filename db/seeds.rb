@@ -6,7 +6,7 @@ people = [
   { name: "Eve Martinez", initials: "EM" },
   { name: "Frank Castle", initials: "FC" },
   { name: "Grace Hopper", initials: "GH" },
-  { name: "Henry Ford", initials: "HF" },
+  { name: "Henry Ford", initials: "HF" }
 ]
 
 people.each do |attrs|

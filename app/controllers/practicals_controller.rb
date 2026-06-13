@@ -1,7 +1,5 @@
 class PracticalsController < ApplicationController
   def index
-    if params[:submitted].present?
-      @submitted = params
-    end
+    @submitted = params if params[:submitted].present?
   end
 end
